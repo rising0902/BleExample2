@@ -1,5 +1,4 @@
 <resources>
     <string name="app_name">BleExample</string>
-    <string name="hello_round">Hello Round World!</string>
-    <string name="hello_square">Hello Square World!</string>
+    <string name="ble_not_supported">Ble is not supported!</string>
 </resources>

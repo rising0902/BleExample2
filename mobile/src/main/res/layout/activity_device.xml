@@ -23,4 +23,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/write_alert_level" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/serial_number"/>
+
+    </LinearLayout>
+
 </LinearLayout>

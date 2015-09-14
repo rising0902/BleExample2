@@ -8,6 +8,7 @@ import android.bluetooth.le.ScanResult;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +25,8 @@ public class ScanActivity extends BaseActivity {
     private DeviceScanCallback mDeviceScanCallback;
     private DeviceAdapter mDeviceAdapter;
     private boolean mIsScanning;
+
+    private final static String TAG = "ScanActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,4 +168,5 @@ public class ScanActivity extends BaseActivity {
             invalidateOptionsMenu();
         }
     }
+
 }

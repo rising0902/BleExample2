@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.TextView;
 
 import java.util.UUID;
 
@@ -27,6 +28,7 @@ public class DeviceActivity extends BaseActivity implements View.OnClickListener
     private Button mReadManufacturerNameButton;
     private Button mReadSerialNumberButton;
     private Button mWriteAlertLevelButton;
+    private TextView mSerialNumberTextView;
 
     private final BluetoothGattCallback mGattcallback = new BluetoothGattCallback() {
 
@@ -42,10 +44,10 @@ public class DeviceActivity extends BaseActivity implements View.OnClickListener
                         mReadManufacturerNameButton.setEnabled(false);
                         mReadSerialNumberButton.setEnabled(false);
                         mWriteAlertLevelButton.setEnabled(false);
-                    };
+                    }
                 });
             }
-        };
+        }
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
@@ -60,7 +62,7 @@ public class DeviceActivity extends BaseActivity implements View.OnClickListener
                         public void run() {
                             mReadManufacturerNameButton.setEnabled(true);
                             mReadSerialNumberButton.setEnabled(true);
-                        };
+                        }
                     });
                 }
                 if (BleUuid.SERVICE_IMMEDIATE_ALERT.equalsIgnoreCase(service.getUuid().toString())) {
@@ -78,10 +80,10 @@ public class DeviceActivity extends BaseActivity implements View.OnClickListener
 					setProgressBarIndeterminateVisibility(false);
 				};
 			});
-        };
+        }
 
-		@Override
-		public void onCharacteristicRead(BluetoothGatt gatt,
+        @Override
+        public void onCharacteristicRead(BluetoothGatt gatt,
 				BluetoothGattCharacteristic characteristic, int status) {
 			if (status == BluetoothGatt.GATT_SUCCESS) {
 				if (BleUuid.CHAR_MANUFACTURER_NAME_STRING
@@ -116,7 +118,7 @@ public class DeviceActivity extends BaseActivity implements View.OnClickListener
 					setProgressBarIndeterminateVisibility(false);
 				};
 			});
-        };
+        }
     };
 
     @Override
@@ -132,6 +134,7 @@ public class DeviceActivity extends BaseActivity implements View.OnClickListener
         mReadSerialNumberButton.setOnClickListener(this);
         mWriteAlertLevelButton = (Button) findViewById(R.id.write_alert_level_button);
         mWriteAlertLevelButton.setOnClickListener(this);
+        mSerialNumberTextView = (TextView) findViewById(R.id.serial_number);
     }
 
     @Override
@@ -154,40 +157,34 @@ public class DeviceActivity extends BaseActivity implements View.OnClickListener
         }
     }
 
-	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-	@Override
-	public void onClick(View v) {
-		if (v.getId() == R.id.read_manufacturer_name_button) {
-			if ((v.getTag() != null)
-					&& (v.getTag() instanceof BluetoothGattCharacteristic)) {
-				BluetoothGattCharacteristic ch = (BluetoothGattCharacteristic) v
-						.getTag();
-				if (mConnGatt.readCharacteristic(ch)) {
-					setProgressBarIndeterminateVisibility(true);
-				}
-			}
-		} else if (v.getId() == R.id.read_serial_number_button) {
-			if ((v.getTag() != null)
-					&& (v.getTag() instanceof BluetoothGattCharacteristic)) {
-				BluetoothGattCharacteristic ch = (BluetoothGattCharacteristic) v
-						.getTag();
-				if (mConnGatt.readCharacteristic(ch)) {
-					setProgressBarIndeterminateVisibility(true);
-				}
-			}
-
-		} else if (v.getId() == R.id.write_alert_level_button) {
-			if ((v.getTag() != null)
-					&& (v.getTag() instanceof BluetoothGattCharacteristic)) {
-				BluetoothGattCharacteristic ch = (BluetoothGattCharacteristic) v
-						.getTag();
-				ch.setValue(new byte[] { (byte) 0x03 });
-				if (mConnGatt.writeCharacteristic(ch)) {
-					setProgressBarIndeterminateVisibility(true);
-				}
-			}
-		}
-	}
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.read_manufacturer_name_button) {
+            if ((v.getTag() != null) && (v.getTag() instanceof BluetoothGattCharacteristic)) {
+                BluetoothGattCharacteristic ch = (BluetoothGattCharacteristic) v.getTag();
+                if (mConnGatt.readCharacteristic(ch)) {
+                    setProgressBarIndeterminateVisibility(true);
+                }
+            }
+        } else if (v.getId() == R.id.read_serial_number_button) {
+            if ((v.getTag() != null) && (v.getTag() instanceof BluetoothGattCharacteristic)) {
+                BluetoothGattCharacteristic ch = (BluetoothGattCharacteristic) v.getTag();
+                if (mConnGatt.readCharacteristic(ch)) {
+                    mSerialNumberTextView.setText(ch.getStringValue(0));
+                    setProgressBarIndeterminateVisibility(true);
+                }
+            }
+        } else if (v.getId() == R.id.write_alert_level_button) {
+            if ((v.getTag() != null) && (v.getTag() instanceof BluetoothGattCharacteristic)) {
+                BluetoothGattCharacteristic ch = (BluetoothGattCharacteristic) v.getTag();
+                ch.setValue(new byte[]{(byte) 0x03});
+                if (mConnGatt.writeCharacteristic(ch)) {
+                    setProgressBarIndeterminateVisibility(true);
+                }
+            }
+        }
+    }
 
     protected void initialize() {
         super.initialize();
