@@ -16,4 +16,9 @@
         android:text="Advertise Stop"
         android:id="@+id/advertiseStopButton" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/statusTextView" />
+
 </LinearLayout>

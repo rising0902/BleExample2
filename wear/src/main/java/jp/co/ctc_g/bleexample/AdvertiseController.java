@@ -2,6 +2,7 @@ package jp.co.ctc_g.bleexample;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
@@ -9,11 +10,9 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
-import android.bluetooth.le.BluetoothLeScanner;
 import android.content.Context;
 import android.os.ParcelUuid;
 
-import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 import static jp.co.ctc_g.bleexample.Constants.*;
@@ -23,7 +22,6 @@ public class AdvertiseController {
     private Context context;
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter bluetoothAdapter;
-    private BluetoothLeScanner bluetoothLeScanner;
     private BluetoothLeAdvertiser bluetoothLeAdvertiser;
     private BluetoothGattServer gattServer;
     private AdvertiseCallback advertiseCallback;
@@ -32,13 +30,12 @@ public class AdvertiseController {
         this.context = context;
         bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         bluetoothAdapter = bluetoothManager.getAdapter();
-        bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
         bluetoothLeAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
         advertiseCallback = new LoggingAdvertiseCallback();
     }
 
     public void startAdvertising() {
-        gattServer = bluetoothManager.openGattServer(context, new LoggingBluetoothGattServerCallback());
+        gattServer = bluetoothManager.openGattServer(context, new LoggingBluetoothGattServerCallback(gattServer));
         setupUuid();
         bluetoothLeAdvertiser.startAdvertising(createSettings(), createAdvertiseData(), advertiseCallback);
     }
@@ -68,6 +65,10 @@ public class AdvertiseController {
                         BluetoothGattCharacteristic.PROPERTY_WRITE,
                 BluetoothGattCharacteristic.PERMISSION_READ |
                         BluetoothGattCharacteristic.PERMISSION_WRITE);
+        characteristic.setValue("0x01".getBytes());
+        BluetoothGattDescriptor desc = new BluetoothGattDescriptor(UUID.fromString(DESCRIPTOR_UUID), BluetoothGattDescriptor.PERMISSION_READ | BluetoothGattDescriptor.PERMISSION_WRITE);
+        desc.setValue("0xaa".getBytes());
+        //characteristic.addDescriptor(desc);
 
         service.addCharacteristic(characteristic);
 
@@ -87,8 +88,9 @@ public class AdvertiseController {
         dataBuilder.setIncludeTxPowerLevel(true);
         ParcelUuid uuid = new ParcelUuid(UUID.fromString(SERVICE_UUID));
         dataBuilder.addServiceUuid(uuid);
-        dataBuilder.addServiceData(uuid, convert("This is Test."));
-        return dataBuilder.build();
+        //dataBuilder.addServiceData(uuid, "IAI".getBytes(Charset.forName("UTF-8")));
+        AdvertiseData advertiseData = dataBuilder.build();
+        return advertiseData;
     }
 
     private byte[] convert(String str) {
@@ -118,4 +120,5 @@ public class AdvertiseController {
         // バイト配列を返す。
         return bytes;
     }
+
 }

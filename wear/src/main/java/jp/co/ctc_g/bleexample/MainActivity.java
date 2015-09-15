@@ -6,19 +6,21 @@ import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import de.greenrobot.event.EventBus;
+import jp.co.ctc_g.common.BleUtil;
 import knowledgedatabase.info.bleexample.R;
 
 public class MainActivity extends Activity {
 
     private final static String TAG = "MainActivity";
 
-    private boolean bleEnabled = true;
     private AdvertiseController advertiseController;
     private Button advertiseStartButton;
     private Button advertiseStopButton;
+    private TextView statusTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,8 +28,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
 
-        if (!isBleEnabled()) {
-            bleEnabled = false;
+        if (!BleUtil.isBLESupported(getApplicationContext())) {
             finish();
         }
 
@@ -41,6 +42,7 @@ public class MainActivity extends Activity {
                     @Override
                     public void onClick(View v) {
                         advertiseController.startAdvertising();
+                        statusTextView.setText("Now Advertising!");
                     }
                 });
                 advertiseStopButton = (Button) findViewById(R.id.advertiseStopButton);
@@ -48,8 +50,10 @@ public class MainActivity extends Activity {
                     @Override
                     public void onClick(View v) {
                         advertiseController.stopAdvertising();
+                        statusTextView.setText("");
                     }
                 });
+                statusTextView = (TextView) findViewById(R.id.statusTextView);
             }
         });
     }
@@ -64,15 +68,6 @@ public class MainActivity extends Activity {
         super.onPause();
         // EventBus.getDefault().unregister(this);
         // advertiseController.stopAdvertising();
-    }
-
-    private boolean isBleEnabled() {
-        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
-            return false;
-        } else {
-            return true;
-        }
     }
 
 }

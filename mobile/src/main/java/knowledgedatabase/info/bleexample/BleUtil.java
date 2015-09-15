@@ -6,16 +6,12 @@ import android.content.pm.PackageManager;
 
 public class BleUtil {
 
-    private BleUtil() {
-        // Util
-    }
+    private BleUtil() {}
 
-    /** check if BLE Supported device */
     public static boolean isBLESupported(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
     }
 
-    /** get BluetoothManager */
     public static BluetoothManager getManager(Context context) {
         return (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
     }
