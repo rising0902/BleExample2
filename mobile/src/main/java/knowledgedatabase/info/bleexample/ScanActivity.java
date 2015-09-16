@@ -19,7 +19,14 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnItemClick;
+
 public class ScanActivity extends BaseActivity {
+
+    @Bind(R.id.list)
+    ListView mListView;
 
     private BluetoothLeScanner mBluetoothLeScanner;
     private DeviceScanCallback mDeviceScanCallback;
@@ -33,6 +40,7 @@ public class ScanActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_scan);
+        ButterKnife.bind(this);
 
         initialize();
     }
@@ -40,8 +48,8 @@ public class ScanActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         stopScan();
+        ButterKnife.unbind(this);
     }
 
     @Override
@@ -86,26 +94,38 @@ public class ScanActivity extends BaseActivity {
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         mDeviceScanCallback = new DeviceScanCallback();
 
-        ListView deviceListView = (ListView) findViewById(R.id.list);
         mDeviceAdapter = new DeviceAdapter(this, R.layout.listitem_device,
                 new ArrayList<ScannedDevice>());
-        deviceListView.setAdapter(mDeviceAdapter);
-        deviceListView.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterview, View view, int position, long id) {
-                ScannedDevice item = mDeviceAdapter.getItem(position);
-                if (item != null) {
-                    Intent intent = new Intent(view.getContext(), DeviceActivity.class);
-                    BluetoothDevice selectedDevice = item.getDevice();
-                    intent.putExtra(DeviceActivity.EXTRA_BLUETOOTH_DEVICE, selectedDevice);
-                    startActivity(intent);
+        mListView.setAdapter(mDeviceAdapter);
+        //mListView.setOnItemClickListener(new OnItemClickListener() {
+        //    @Override
+        //    public void onItemClick(AdapterView<?> adapterview, View view, int position, long id) {
+        //        ScannedDevice item = mDeviceAdapter.getItem(position);
+        //        if (item != null) {
+        //            Intent intent = new Intent(view.getContext(), DeviceActivity.class);
+        //            BluetoothDevice selectedDevice = item.getDevice();
+        //            intent.putExtra(DeviceActivity.EXTRA_BLUETOOTH_DEVICE, selectedDevice);
+        //            startActivity(intent);
 
-                    stopScan();
-                }
-            }
-        });
+        //            stopScan();
+        //        }
+        //    }
+        //});
 
         stopScan();
+    }
+
+    @OnItemClick(R.id.list)
+    public void onItemClick(AdapterView<?> adapterview, View view, int position, long id) {
+        ScannedDevice item = mDeviceAdapter.getItem(position);
+        if (item != null) {
+            Intent intent = new Intent(view.getContext(), DeviceActivity.class);
+            BluetoothDevice selectedDevice = item.getDevice();
+            intent.putExtra(DeviceActivity.EXTRA_BLUETOOTH_DEVICE, selectedDevice);
+            startActivity(intent);
+
+            stopScan();
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -147,7 +167,7 @@ public class ScanActivity extends BaseActivity {
         @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         public void onBatchScanResults(List<ScanResult> results) {
             super.onBatchScanResults(results);
-            for (ScanResult result: results) {
+            for (ScanResult result : results) {
                 final BluetoothDevice device = result.getDevice();
                 final int rssi = result.getRssi();
                 final byte[] scanRecord = result.getScanRecord().getBytes();

@@ -8,6 +8,8 @@ import android.content.Context;
 import android.os.Build;
 import android.widget.Toast;
 
+import jp.co.ctc_g.common.BleUtil;
+
 public abstract class BaseActivity extends Activity {
 
     private final static String TAG = "BaseActivity";
