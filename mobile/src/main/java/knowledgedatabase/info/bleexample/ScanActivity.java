@@ -8,6 +8,7 @@ import android.bluetooth.le.ScanResult;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,8 +33,6 @@ public class ScanActivity extends BaseActivity {
     private DeviceScanCallback mDeviceScanCallback;
     private DeviceAdapter mDeviceAdapter;
     private boolean mIsScanning;
-
-    private final static String TAG = "ScanActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,20 +96,6 @@ public class ScanActivity extends BaseActivity {
         mDeviceAdapter = new DeviceAdapter(this, R.layout.listitem_device,
                 new ArrayList<ScannedDevice>());
         mListView.setAdapter(mDeviceAdapter);
-        //mListView.setOnItemClickListener(new OnItemClickListener() {
-        //    @Override
-        //    public void onItemClick(AdapterView<?> adapterview, View view, int position, long id) {
-        //        ScannedDevice item = mDeviceAdapter.getItem(position);
-        //        if (item != null) {
-        //            Intent intent = new Intent(view.getContext(), DeviceActivity.class);
-        //            BluetoothDevice selectedDevice = item.getDevice();
-        //            intent.putExtra(DeviceActivity.EXTRA_BLUETOOTH_DEVICE, selectedDevice);
-        //            startActivity(intent);
-
-        //            stopScan();
-        //        }
-        //    }
-        //});
 
         stopScan();
     }
