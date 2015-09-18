@@ -1,11 +1,9 @@
 package jp.co.ctc_g.bleexample;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothGattService;
@@ -15,41 +13,36 @@ import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.ParcelUuid;
 import android.os.Vibrator;
-import android.support.annotation.Nullable;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
+import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.UUID;
 
-import de.greenrobot.event.EventBus;
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 import jp.co.ctc_g.common.BleUtil;
 import jp.co.ctc_g.common.BleUuid;
 import knowledgedatabase.info.bleexample.R;
 
-import static jp.co.ctc_g.bleexample.Constants.CHARACTERISTIC_UUID;
-import static jp.co.ctc_g.bleexample.Constants.DESCRIPTOR_UUID;
-import static jp.co.ctc_g.bleexample.Constants.SERVICE_UUID;
+import static jp.co.ctc_g.bleexample.BleExampleApplication.TAG;
 
 public class MainActivity extends BaseActivity {
-
-    private final static String TAG = "MainActivity";
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     private BluetoothGattServer mBluetoothGattServer;
     private AdvertiseCallback mAdvertiseCallback;
-    private Button advertiseStartButton;
-    private Button advertiseStopButton;
-    private TextView statusTextView;
+    @Bind(R.id.statusTextView)
+    TextView statusTextView;
+    @Bind(R.id.advertiseSwitch)
+    Switch advertiseSwitch;
     private byte[] mAlertLevel = new byte[] { (byte) 0x00 };
 
     @Override
@@ -59,7 +52,7 @@ public class MainActivity extends BaseActivity {
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
 
         if (!BleUtil.isBLESupported(getApplicationContext())) {
-            showText("BLE not supported!");
+            showText(getString(R.string.ble_not_supported));
             finish();
         }
 
@@ -68,37 +61,28 @@ public class MainActivity extends BaseActivity {
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
-                advertiseStartButton = (Button) findViewById(R.id.advertiseStartButton);
-                advertiseStartButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        startAdvertise();
-                        statusTextView.setText("Now Advertising!");
-                    }
-                });
-                advertiseStopButton = (Button) findViewById(R.id.advertiseStopButton);
-                advertiseStopButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        stopAdvertise();
-                        statusTextView.setText("");
-                    }
-                });
-                statusTextView = (TextView) findViewById(R.id.statusTextView);
+                ButterKnife.bind(MainActivity.this);
             }
         });
     }
 
-    public void onResume() {
-        super.onResume();
-        // EventBus.getDefault().register(this);
-        // advertiseController.startAdvertising();
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i(TAG, "#onPause");
     }
 
-    public void onPause() {
-        super.onPause();
-        // EventBus.getDefault().unregister(this);
-        // advertiseController.stopAdvertising();
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.i(TAG, "#onStop");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG, "#onDestroy");
+        ButterKnife.unbind(this);
     }
 
     private void initialize() {
@@ -212,6 +196,18 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    @OnCheckedChanged(R.id.advertiseSwitch)
+    void onCheckedChanged(Switch advertiseSwitch, boolean isChecked) {
+        Log.i(TAG, "#onCheckedChanged [" + isChecked + "]");
+        if (isChecked) {
+            startAdvertise();
+            statusTextView.setText(getString(R.string.switch_on));
+       } else {
+            stopAdvertise();
+            statusTextView.setText(getString(R.string.switch_off));
+        }
+    }
+
     private void setupUuid() {
         BluetoothGattService ias = new BluetoothGattService(
                 UUID.fromString(BleUuid.SERVICE_IMMEDIATE_ALERT),
@@ -238,9 +234,8 @@ public class MainActivity extends BaseActivity {
     private AdvertiseData createAdvertiseData() {
         AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
         dataBuilder.setIncludeTxPowerLevel(true);
-        ParcelUuid uuid = new ParcelUuid(UUID.fromString(SERVICE_UUID));
+        ParcelUuid uuid = new ParcelUuid(UUID.fromString(BleUuid.SERVICE_IMMEDIATE_ALERT));
         dataBuilder.addServiceUuid(uuid);
-        //dataBuilder.addServiceData(uuid, "IAI".getBytes(Charset.forName("UTF-8")));
         AdvertiseData advertiseData = dataBuilder.build();
         return advertiseData;
     }
